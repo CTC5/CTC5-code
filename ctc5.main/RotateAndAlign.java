@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import ij.IJ;
 import ij.ImagePlus;
+//import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.OvalRoi;
 import ij.measure.ResultsTable;
@@ -406,7 +407,7 @@ public class RotateAndAlign
 		String flour_pores = pores_only_ROI(fluor_file_path,false);
 		
 		ImagePlus imp = new ImagePlus(flour_pores);
-		
+			
 		configure_for_analyse_particles(imp);
 		IJ.run(imp, "Set Measurements...", "area centroid redirect=None decimal=3");
 
@@ -504,30 +505,34 @@ public class RotateAndAlign
 		}
 		for(int y = 0; y<freq_table_y_smooth.length; y++)
 		{
-			IJ.log("[y] Cutoff = "+cutoff+"; freq_table_y_smooth["+y+"]"+freq_table_y_smooth[y]);
-			
 			if(freq_table_y_smooth[y]>=cutoff)
 			{
+				IJ.log("[y] Cutoff = "+cutoff+"; freq_table_y_smooth["+y+"]"+freq_table_y_smooth[y]);
+				
 				makeOval[1] = (bins_y[y]+bins_y[y+1])/2;
 				y=freq_table_y_smooth.length;
 			}
 		}
 		for(int w = freq_table_x_smooth.length-1; w>=0; w--)
 		{
-			IJ.log("[w] Cutoff = "+cutoff+"; freq_table_x_smooth["+w+"]"+freq_table_x_smooth[w]);
+			
 			
 			if(freq_table_x_smooth[w]>=cutoff)
 			{
+				IJ.log("[w] Cutoff = "+cutoff+"; freq_table_x_smooth["+w+"]"+freq_table_x_smooth[w]);
+				
 				makeOval[2] = ((bins_x[w]+bins_x[w+1])/2)-makeOval[0];
 				w = -1;
 			}
 		}
 		for(int h = freq_table_y_smooth.length-1; h>=0; h--)
 		{
-			IJ.log("[h] Cutoff = "+cutoff+"; freq_table_y_smooth["+h+"]"+freq_table_y_smooth[h]);
+			
 			
 			if(freq_table_y_smooth[h]>=cutoff)
 			{
+				IJ.log("[h] Cutoff = "+cutoff+"; freq_table_y_smooth["+h+"]"+freq_table_y_smooth[h]);
+				
 				makeOval[3] = ((bins_y[h]+bins_y[h+1])/2)-makeOval[1];
 				h = -1;
 			}
@@ -605,11 +610,13 @@ public class RotateAndAlign
 		if(isNDPI_image)
 		{ 
 			IJ.run(imp, "Auto Threshold", "method=Moments ignore_black ignore_white white");
+			//Prefs.set("blackBackground", ""+false);
 			IJ.run(imp, "Make Binary","");
 		}
 		else
 		{
 			IJ.run(imp, "Auto Threshold", "method=Moments ignore_black ignore_white white"); 
+			//Prefs.set("blackBackground", ""+false);
 			IJ.run(imp, "Make Binary","");
 		}
 		
@@ -758,7 +765,7 @@ public class RotateAndAlign
 		Arrays.sort(area_array);
 		
 		
-		int threshold_index = (int) ((area_array.length*0.95)+0.5);
+		int threshold_index = (int) ((area_array.length*0.98)+0.5);
 		int outlier_threshold = (int) ((area_array[threshold_index])+0.5);
 		IJ.log("threshold_index = "+threshold_index);
 		IJ.log("outlier_threshold = "+outlier_threshold);
@@ -905,7 +912,7 @@ public class RotateAndAlign
 		/** holds a list of objects containing scale, rotation and translation information */
 		AlignmentObject[][] all_alignments = new AlignmentObject[als.size()][]; 
 		
-		double rotationStep = 8.0; 
+		double rotationStep = 9.0; 
 		
 		/** rotate to +/- 180 */
 		int number_of_steps = (int)(180.0/rotationStep);
@@ -944,8 +951,11 @@ public class RotateAndAlign
 			{
 				/** 
 				 * set the default areaScore to 1.0
-				 * less than 0.75 will be considered aligned.
+				 * less than 0.75 will be considered aligned. 
 				 */
+				
+				//TODO: might also be worth including a criteria that the refined rotation cannot be greater than step distance. Occasionally, a large rotation can get a crude match that is close but not quite perfect. A refined rotation limit may generate more stable alignments.
+				
 				areaScoreTracker[a] = 1.0; 
 			}	
 			
@@ -1359,6 +1369,7 @@ public class RotateAndAlign
 		IJ.log("	'output' stack size = "+output.getStackSize());
 		output.setSlice(0);
 		ImagePlus data = new ImagePlus("Data", output.getProcessor().duplicate());
+		//Prefs.set("blackBackground", ""+false);
 		IJ.run(data, "Make Binary", "");
 		
 		ImageCalculator ic = new ImageCalculator();
@@ -1591,6 +1602,16 @@ public class RotateAndAlign
 	{
 		boolean wasInverted;
 		
+		if(imp.isInvertedLut())
+		{
+			IJ.log("image is using inverted LUT... switching back to normal LUT");
+			IJ.run(imp, "Invert LUT", "");
+		}
+		else
+		{
+			IJ.log("image is NOT using inverted LUT... no action needed");
+		}
+		
 		IJ.run("Colors...", "foreground=black background=white selection=red"); /** This sets it up so that background is white and allows sets a standardised start point for analyse particles. */
 		
 		IJ.run("Set Measurements...", "mean");
@@ -1606,7 +1627,7 @@ public class RotateAndAlign
 		int mean_index = results.getColumnIndex("Mean");
 		double[] mean = results.getColumnAsDoubles(mean_index);
 
-		if(mean[0] > 127.5)
+		if(mean[0] < 127.5)
 		{
 			IJ.log("LUT mean = "+mean[0]+"; inverting....");
 			IJ.run(imp, "Invert", "");
