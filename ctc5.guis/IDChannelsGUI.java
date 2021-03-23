@@ -54,10 +54,23 @@ public class IDChannelsGUI extends JFrame
 		for(int i = 0; i < numOfChannels; i++)
 		{
 			selectedChannels[i] = selChannels.get(i);
-			radioArray[i] =  new JRadioButton();
-			radioGroup.add(radioArray[i]);
+			if(i==0)
+			{
+				radioArray[i] =  new JRadioButton();
+				radioArray[i].setSelected(true);
+			}
+			else
+			{
+				radioArray[i] =  new JRadioButton();	
+			}
+						radioGroup.add(radioArray[i]);
 			channelID[i] = new TextField("_w0000", 8);
 			templates[i] = new JComboBox(refTemplates);
+			
+			if(i == (numOfChannels-1))
+			{
+				templates[i].setSelectedIndex(refTemplates.length-1);
+			}
 		}
 	}
 	
@@ -93,9 +106,15 @@ public class IDChannelsGUI extends JFrame
 	public JPanel makeInterfacePane()
 	{
 		JPanel chID = new JPanel(new GridLayout(0,4));
+		String[] defaultText = {"_w0000","_w0001","_w0002","_CD45_"};
 		
 		for(int i = 0; i<numOfChannels; i++)
 		{
+			if(defaultText.length == channelID.length)
+			{
+				channelID[i].setText(defaultText[i]);
+			}
+			
 			chID.add(new JLabel(selectedChannels[i]));
 			chID.add(radioArray[i]);
 			chID.add(channelID[i]);

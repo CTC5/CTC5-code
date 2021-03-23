@@ -53,11 +53,20 @@ public class ChannelsGUI extends JFrame {
 		JPanel l = new JPanel(new GridLayout(4, 1));
 		
 		int size = channels.length;
+		boolean[] checks = {true, true, true, true, false, false, false};
 		channelsCheck = new Checkbox[size];
 		
 		for(int i = 0; i<size; i++)
 		{
-			channelsCheck[i] = new Checkbox(channels[i], true);
+			if(checks.length == size)
+			{
+				channelsCheck[i] = new Checkbox(channels[i], checks[i]);
+			}
+			else
+			{
+				channelsCheck[i] = new Checkbox(channels[i], true);
+			}
+			
 			l.add(channelsCheck[i]);
 		}
 		

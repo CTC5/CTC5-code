@@ -129,13 +129,13 @@ public class FocalPlanesGUI extends JFrame
         	{
         		inputPanel.add(new JLabel((String)fileList.get(i)));
           
-        		focalPlanes[i][0] = new JTextField("-4000, -2000, 0", 10);
+        		focalPlanes[i][0] = new JTextField("-6000, -4000, -2000", 10);
         		inputPanel.add(focalPlanes[i][0]);
           
         		focalPlanes[i][1] = new JTextField("-6000, -4000, -2000, 0", 10);
         		inputPanel.add(focalPlanes[i][1]);
           
-        		focalPlanes[i][2] = new JTextField("-8000,-6000, -4000", 10);
+        		focalPlanes[i][2] = new JTextField("-8000,-6000", 10);
         		inputPanel.add(focalPlanes[i][2]);
           
         		focalPlanes[i][3] = new JTextField("-8000,-6000, -4000", 10);
